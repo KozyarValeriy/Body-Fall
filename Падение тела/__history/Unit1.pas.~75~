@@ -1,0 +1,161 @@
+unit Unit1;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons;
+
+type
+  TForm1 = class(TForm)
+    Shape2: TShape;
+    Timer2: TTimer;
+    SpeedButton1: TSpeedButton;
+    Shape4: TShape;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Edit1: TEdit;
+    Edit2: TEdit;
+    procedure FormMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure Shape1MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure Timer2Timer(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
+
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+//procedure moves();
+
+var
+  Form1: TForm1; coord:TPoint;
+  i, h, p, marg: integer; V_0, dx, V, s_0: real;
+  g, dz, k, a, s, s_prev, eps: real;
+
+implementation
+
+{$R *.dfm}
+
+procedure TForm1.FormCreate(Sender: TObject);
+  begin
+    i := 0;
+    dx := 0.4;
+    V_0 := 0;
+    h := form1.height - shape4.top;
+    s_0 := shape4.Top;
+    V := 0;
+    eps := 15;
+    dz :=  0;
+    marg := round(shape4.Height * 0.5);
+    p := 0;
+    g := 9.81;
+    timer2.Interval := 1;
+    shape2.BringToFront;
+  end;
+
+procedure TForm1.FormMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+  var R: integer;
+  begin
+   // Sleep(30);
+    R := 3;
+    coord := ScreenToClient(Mouse.CursorPos);
+    shape2.Left := coord.X - R;
+    shape2.Top := coord.Y - R;
+    label3.Caption := inttostr(coord.Y);
+    label4.Caption := inttostr(coord.X);
+  end;
+
+procedure TForm1.Shape1MouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+  var R, x0, y0: integer;
+  begin
+    //Sleep(10);
+    R := 3;
+    coord := ScreenToClient(Mouse.CursorPos);
+    shape2.Left := coord.X - R;
+    shape2.Top := coord.Y - R;
+    if  ssright in shift then
+      begin
+        timer2.Enabled := false;
+        shape4.Top := (coord.Y - round(shape4.height / 2));
+        shape4.Left := (coord.X - round(shape4.width / 2));
+        FormCreate(self);
+        //speedbutton1Click(self);
+      end;
+    label3.Caption := inttostr(coord.Y);
+    label4.Caption := inttostr(coord.X);
+    x0 := 0;//coord.X;
+    y0 := 0;//coord.Y;
+  end;
+
+procedure TForm1.SpeedButton1Click(Sender: TObject);
+  begin
+      if timer2.Enabled = false then
+          FormCreate();
+      timer2.Enabled := not timer2.Enabled;
+
+  end;
+
+
+
+procedure TForm1.Timer2Timer(Sender: TObject);
+  var b: integer; m: integer;
+  begin
+     //randomize;
+     i := i + 1;
+     m := strtoint(edit1.text);
+     k := strtofloat(edit2.text);
+     a := (m * g - k * V) / m;
+     if (shape4.Top + shape4.Height) <= (form1.Height - marg) then
+          begin
+              V := V_0 + dx * a * i;
+              s := s_0 + dx * (V_0 * i + dx * a * i * i / (2));
+              s_prev := s;
+              //a := (m * g - k * V) / m;
+              //V_0 := dx * g * i;
+              shape4.Top := round(s);
+              //shape4.Left := shape4.Left + round(dz);
+              //label3.caption := floattostr(dx * (round(V_0 * i + dx * a * i * i / (2))));
+              label4.caption := floattostr(k * V);
+              label5.caption := floattostr(a);
+
+              if (V <= 0) and (dx < 0) then
+                  begin
+                      s_0 := shape4.Top;
+                      dx := -dx;
+                      V_0 := 0;
+                      V := 0;
+                      i := 0;
+                  end;
+
+          end;
+      if (shape4.Top + shape4.Height) >= (form1.Height - marg) then
+          begin
+              shape4.Top := form1.Height - marg - shape4.Height;
+              s_0 := shape4.Top;
+              dx := dx * (-1);
+              V_0 := abs(dx) * a * i * (0.9 - p / 10);
+              if V_0 <= eps then
+                  timer2.Enabled := false
+              else
+                  begin
+                      i := 1;
+                      s := s_0 + dx * (V_0 * i + dx * a * i * i / (2));
+                      shape4.Top := round(s);
+                      p := p + 1;
+                      label3.caption := inttostr(p);
+                  end;
+          end;
+      if timer2.Enabled then
+          label3.Caption := '1'
+      else
+          label3.Caption := '0';
+  end;
+
+end.
